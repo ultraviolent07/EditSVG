@@ -6,7 +6,7 @@ from string import Template
 
 
 PATCH_PROMPT_TEMPLATE_DIR = Path(__file__).resolve().parents[1] / "prompt_templates"
-PATCH_PROMPT_VERSION = 3
+PATCH_PROMPT_VERSION = 4
 PATCH_EXAMPLES: tuple[dict, ...] = ()
 
 
