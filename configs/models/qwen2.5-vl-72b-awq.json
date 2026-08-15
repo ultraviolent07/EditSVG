@@ -5,5 +5,5 @@
   "temperature": 0.0,
   "json_mode": false,
   "max_tokens": 256,
-  "timeout": 240
+  "timeout": 180
 }
