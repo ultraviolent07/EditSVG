@@ -65,13 +65,19 @@ Follow these strict rules for the "summary" field:
 1. Identify the exact object or part (e.g., "tire", "window").
 2. Include its spatial location relative to the whole image AND relative to important nearby nodes (e.g., "bottom-left tire attached to the red car").
 3. Include its current visual state like color or pattern (e.g., "solid black").
-4. If the node is only a tiny fragment, highlight, or shadow, state that clearly so it isn't confused with the main object.
+4. If the node is a letter, number, or punctuation mark, explicitly state the full word or phrase it belongs to (e.g., 'The letter P in the word UP!').
+5. If the node is only a tiny fragment, highlight, or shadow, state that clearly so it isn't confused with the main object.
 
-For the "labels" array, use exact semantic terms a user might say in an edit instruction, such as window, eye, roof, shadow, outline, handle, letter, background, wheel, or highlight.
+For the "role" field:
+- If the node represents the main, large filled body or structural foundation of an object, assign the role "primary_fill". 
+- Use "part" for smaller details, and "shadow"/"outline"/"background" where appropriate.
+
+For the "labels" array:
+- Use exact semantic terms a user might say in an edit instruction, such as window, eye, roof, shadow, outline, handle, letter, background, wheel, or highlight.
 
 SVG node metadata:
 {node_json}
 
 Return only JSON with this shape:
-{{"summary":"[color/state] [object/part] located at [relative position]","labels":["label1","label2"],"role":"object|part|style|shadow|outline|background|unknown","confidence":0.0}}
+{{"summary":"[color/state] [object/part] located at [relative position]","labels":["label1","label2"],"role":"object|part|style|shadow|outline|background|unknown|primary_fill","confidence":0.0}}
 """
