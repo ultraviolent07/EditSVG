@@ -5,5 +5,35 @@
   "temperature": 0.0,
   "json_mode": false,
   "max_tokens": 512,
-  "timeout": 120
+  "timeout": 120,
+  "extra_body": {
+    "response_format": {
+      "type": "json_schema",
+      "json_schema": {
+        "name": "patch",
+        "strict": true,
+        "schema": {
+          "type": "object",
+          "properties": {
+            "version": {"type": "integer"},
+            "operations": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "op": {"type": "string", "enum": ["set_attributes"]},
+                  "targets": {"type": "array", "items": {"type": "string"}},
+                  "attributes": {"type": "object", "additionalProperties": {"type": "string"}}
+                },
+                "required": ["op", "targets", "attributes"],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": ["version", "operations"],
+          "additionalProperties": false
+        }
+      }
+    }
+  }
 }
