@@ -69,6 +69,11 @@ class VisionContextAnnotator:
                 node["visual_context"] = cached
                 count += 1
                 continue
+            
+            # HARD FALLBACK: If cache is provided but we missed, skip the node
+            # instead of crashing by trying to query an offline vision server.
+            if self.cache_dir is not None:
+                continue
 
             rendered = render_node_comparison(svg, node_id, size=self.image_size)
             if rendered is None or rendered.visible_pixels < self.min_visible_pixels:
