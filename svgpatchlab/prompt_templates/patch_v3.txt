@@ -33,11 +33,19 @@ Planning checklist:
 4. Never modify path data (`d`) or polygon/polyline coordinate data (`points`).
 5. Do not insert new shapes. Modify existing SVG elements only.
 6. Visual context resolution: some nodes in the context contain a
-   `visual_context` field with a `summary` (short phrase) and `labels` (list of
-   semantic terms like "window", "eye", "roof", "wheel", "background").
+   `visual_context` field with a `summary` (short phrase), `labels` (list of
+   semantic terms like "window", "eye", "roof", "wheel", "background"), and a `role`.
+   - Use the visual context strictly to identify semantic objects. Do not infer or invent SVG attributes from the summary text.
    - If the instruction refers to a part by name (e.g. "windows", "roof",
      "eyes", "door"), first check each node's `visual_context.labels` and
      `visual_context.summary` for a match. Target those nodes.
+   - If the instruction asks to edit a specific letter, word, or punctuation
+     mark, explicitly check the `visual_context.summary` for exact OCR text 
+     matches (e.g. 'UP!') and target those nodes.
+   - If the instruction generically refers to the "base", "main body", "structure",
+     or an object without specifying a sub-part, prioritize targeting nodes 
+     that have `"role": "primary_fill"`. Do NOT target `"role": "part"`, 
+     `"highlight"`, or `"shadow"` for these root object edits.
    - If no `visual_context` is present on any node, fall back to matching by
      `fill` color or structural position as usual.
    - `visual_context` labels take priority over color matching when both are
@@ -48,9 +56,7 @@ Generic SVG edit rules:
   * If the instruction says to change the part with OLD_COLOR to NEW_COLOR,
     find nodes whose direct `fill` or resolved `fill` equals OLD_COLOR.
   * Set only `fill` to NEW_COLOR on those matching nodes.
-  * EXTREMELY CRITICAL: You MUST use the EXACT color word verbatim. If the instruction says "to green", you MUST output the exact string "green". NEVER EVER convert it to a hex code like "#00FF00" or "#008000". You will fail the task if you output a hex code when a color name was requested.
-  * Do not set `fill` to OLD_COLOR. Do not set `opacity`, `stroke`,
-    `stroke-width`, `transform`, or `viewBox`.
+  * Do not set `fill` to OLD_COLOR. You must only modify the color; do not modify structure or opacity.
   * Do not target n0 for a color change unless n0 itself directly has the
     OLD_COLOR fill.
 - Outline/contour/border changes:
@@ -58,15 +64,11 @@ Generic SVG edit rules:
     or resolved `fill` equals the named source color.
   * Set `stroke` and `stroke-width`.
   * If the outline color is not specified, use black.
-  * CRITICAL: always set `stroke-width` to exactly "1" unless the instruction
-    explicitly gives a different width. Do not use "2" or any other default --
-    this benchmark's convention is stroke-width 1 for every outline edit.
   * Preserve existing `fill`; do not recolor the filled interior.
 - Transparency/opacity changes:
   * Target exactly n0 for an entire-image transparency edit.
-  * Set `opacity` only.
-  * EXTREMELY CRITICAL: NEVER modify or output the `viewBox` attribute during a transparency edit. You must leave `viewBox` completely untouched.
-  * Do not change `fill`, `stroke`, `stroke-width`, `transform`, or `viewBox`.
+  * You must only output the `opacity` attribute. 
+  * Any structural edits or color edits are strictly forbidden here. You are strictly limited to outputting exactly one attribute: opacity. If you output any other attribute name, the system will crash. do not output viewbox for transparency changes
 - Crop/trim/keep-half changes:
   * Target exactly n0 and modify only the root `viewBox`.
   * Use the actual root viewBox from the context. If it is `x y w h`, then:
@@ -80,7 +82,7 @@ Generic SVG edit rules:
   * Target exactly n0 and set only `transform`.
   * If the root viewBox is `x y w h` and y is 0, use:
     `translate(0,h) scale(1,-1)`, replacing h with the actual numeric height.
-  * Do not change `fill`, `stroke`, `opacity`, or `viewBox`.
+  * Any color or viewBox edits are strictly forbidden here.
 
 Compute every target, color, number, and attribute value from the actual
 instruction and actual context below.
